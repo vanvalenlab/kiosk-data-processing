@@ -112,6 +112,6 @@ def process(process_type, func):
 
 if __name__ == '__main__':
     DEBUG = config('DEBUG', default=False, cast=bool)
-    FLASK_PORT = config('PORT', default=8080, cast=int)
+    LISTEN_PORT = config('LISTEN_PORT', default=8080, cast=int)
 
-    app.run(debug=DEBUG, host='0.0.0.0', port=FLASK_PORT)
+    app.run(debug=DEBUG, host='0.0.0.0', port=LISTEN_PORT)
