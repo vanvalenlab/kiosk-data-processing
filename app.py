@@ -40,6 +40,7 @@ from flask_cors import CORS
 import numpy as np
 
 from data_processing import settings
+from data_processing.utils import get_function
 
 
 app = Flask(__name__)
@@ -64,10 +65,8 @@ def healthcheck():
 @app.route('/<process_type>/<func>', methods=['POST'])
 def process(process_type, func):
     try:
-        # first, verify the route parameters
-        func = str(func).lower()
-        process_type = str(process_type).lower()
-        processing_function = PROCESSING_FUNCTIONS[process_type][func]
+        # first, find the requested processing function
+        F = get_function(process_type, function_name)
     except KeyError as err:
         return jsonify({'error': 'Not Found: {}'.format(err)}), 404
 
