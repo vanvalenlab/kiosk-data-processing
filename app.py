@@ -57,25 +57,33 @@ def setup_logging():
 
 
 @app.route('/health', methods=['GET'])
-def healthcheck():
+def health():
     """Health check end-point"""
     return jsonify({'status': 'OK'}), 200
 
 
-@app.route('/<process_type>/<func>', methods=['POST'])
-def process(process_type, func):
+@app.route('/process/<process_type>/<function_name>', methods=['POST'])
+def process(process_type, function_name):
+    """Process data according to the process type and function name.
+    e.g. `/process/pre/normalize` or `/process/post/watershed`
+    # Arguments:
+        process_type: pre or post processing
+        function_name: name of function to apply.
+    # Returns:
+        transformed data as JSON
+    """
     try:
         # first, find the requested processing function
         F = get_function(process_type, function_name)
     except KeyError as err:
-        return jsonify({'error': 'Not Found: {}'.format(err)}), 404
+        return jsonify({'error': '{} Not Found'.format(err)}), 404
 
     try:
         # second, verify the post request data
         request_json = request.get_json(force=True)
-        app.logger.info(json.dumps(request_json, indent=4))
+        app.logger.debug(json.dumps(request_json, indent=4))
     except Exception as err:
-        errmsg = 'Invalid JSON: {}'.format(err)
+        errmsg = 'Malformed JSON: {}'.format(err)
         app.logger.error(errmsg)
         return jsonify({'error': errmsg}), 400
 
@@ -88,7 +96,7 @@ def process(process_type, func):
 
     try:
         pool = Pool()
-        processed = pool.map(processing_function, images)
+        processed = pool.map(F, images)
         pool.close() 
         pool.join()
         return jsonify({'processed': processed}), 200
