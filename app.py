@@ -39,23 +39,12 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import numpy as np
 
-import data_processing
+from data_processing import settings
 
 
 app = Flask(__name__)
 
 CORS(app)
-
-PROCESSING_FUNCTIONS = {
-    'preprocessing': {
-        'noramlize': data_processing.preprocessing.noramlize,
-    },
-    'postprocessing': {
-        'deepcell': data_processing.postprocessing.deepcell,
-        'mibi': data_processing.postprocessing.mibi,
-        'watershed': data_processing.postprocessing.watershed
-    },
-}
 
 
 @app.before_first_request
