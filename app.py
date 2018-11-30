@@ -81,7 +81,6 @@ def process(process_type, function_name):
     try:
         # second, verify the post request data
         request_json = request.get_json(force=True)
-        app.logger.debug(json.dumps(request_json, indent=4))
     except Exception as err:
         errmsg = 'Malformed JSON: {}'.format(err)
         app.logger.error(errmsg)
@@ -99,9 +98,10 @@ def process(process_type, function_name):
         processed = pool.map(F, images)
         pool.close() 
         pool.join()
-        return jsonify({'processed': processed}), 200
+        return jsonify({'processed': [p.tolist() for p in processed]}), 200
     except Exception as err:
-        errmsg = 'Error applying mibi post-processing: {}'.format(err)
+        errmsg = 'Error applying {} post-processing: {}'.format(
+            function_name, err)
         app.logger.error(errmsg)
         return jsonify({'error': errmsg}), 500
 
