@@ -40,10 +40,7 @@ from skimage.measure import label
 logger = logging.getLogger()
 
 
-def mibi(self,
-         prediction,
-         edge_threshold=.25,
-         interior_threshold=.25):
+def mibi(prediction, edge_threshold=.25, interior_threshold=.25):
     """Post-processing for MIBI data. Uniquely segments every cell by
     repeatedly eroding and dilating the cell interior prediction  until a
     boundary is reached.
@@ -146,7 +143,7 @@ def watershed(image, min_distance=10, threshold_abs=0.05):
     return results
 
 
-def deepcell(self, prediction, threshold=.8):
+def deepcell(prediction, threshold=.8):
     """Post-processing for deepcell transform predictions.
     Uses the interior predictions to uniquely label every instance.
     # Arguments:

@@ -34,7 +34,7 @@ import logging
 logger = logging.getLogger()
 
 
-def noramlize(self, image):
+def noramlize(image):
     """Normalize image data by dividing by the maximum pixel value
     # Arguments:
         image: numpy array of image data
