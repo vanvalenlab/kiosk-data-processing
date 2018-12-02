@@ -32,7 +32,6 @@ import os
 import json
 import errno
 import logging
-from multiprocessing import Pool
 
 from decouple import config
 from flask import Flask, jsonify, request
@@ -94,10 +93,7 @@ def process(process_type, function_name):
         return jsonify({'error': errmsg}), 400
 
     try:
-        pool = Pool()
-        processed = pool.map(F, images)
-        pool.close() 
-        pool.join()
+        processed = [F(i) for i in images]
         return jsonify({'processed': [p.tolist() for p in processed]}), 200
     except Exception as err:
         errmsg = 'Error applying {} post-processing: {}'.format(
