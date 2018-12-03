@@ -6,6 +6,12 @@ COPY requirements.txt .
 
 RUN pip install -r requirements.txt
 
+ENV DEBUG=False
+ENV LISTEN_PORT=8080
+ENV WORKERS=2
+ENV WORKERCLASS=sync
+ENV LOG_LEVEL=DEBUG
+
 COPY . .
 
-CMD ["/bin/sh", "-c", "python app.py"]
+ENTRYPOINT [ "./bin/entrypoint.sh" ]

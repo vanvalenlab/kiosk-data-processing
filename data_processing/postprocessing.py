@@ -31,7 +31,6 @@ from __future__ import print_function
 import logging
 
 import numpy as np
-from scipy import ndimage
 from skimage import morphology
 from skimage.feature import peak_local_max
 from skimage.measure import label
@@ -135,7 +134,7 @@ def watershed(image, min_distance=10, threshold_abs=0.05):
         labels=labels,
         exclude_border=False)
 
-    markers = ndimage.label(local_maxi)[0]
+    markers = label(local_maxi)
     segments = morphology.watershed(-distance, markers, mask=labels)
     results = np.expand_dims(segments, axis=-1)
     results = morphology.remove_small_objects(
@@ -154,7 +153,7 @@ def deepcell(prediction, threshold=.8):
     """
     interior = prediction[..., 2] > threshold
     data = np.expand_dims(interior, axis=-1)
-    labeled = ndimage.label(data)[0]
+    labeled = label(data)
     labeled = morphology.remove_small_objects(
         labeled, min_size=50, connectivity=1)
     return labeled
