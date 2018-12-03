@@ -47,6 +47,12 @@ app = Flask(__name__)
 CORS(app)
 
 
+if __name__ != '__main__':
+    gunicorn_logger = logging.getLogger('gunicorn.error')
+    app.logger.handlers = gunicorn_logger.handlers
+    app.logger.setLevel(gunicorn_logger.level)
+
+
 @app.before_first_request
 def setup_logging():
     """Set up logging to send INFO to stderr"""
