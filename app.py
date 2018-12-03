@@ -86,24 +86,35 @@ def process(process_type, function_name):
     try:
         # second, verify the post request data
         request_json = request.get_json(force=True)
-    except Exception as err:
+    except Exception as err:  # pylint: disable=broad-except
         errmsg = 'Malformed JSON: {}'.format(err)
         app.logger.error(errmsg)
         return jsonify({'error': errmsg}), 400
 
     try:
-        images = [np.array(d['image']) for d in request_json['instances']]
-    except Exception as err:
-        errmsg = 'Could not process JSON data as images: {}'.format(err)
-        app.logger.error(errmsg)
+        images = []
+        for i in request_json['instances']:
+            image = np.array(i['image'])
+            images.append(image)
+            app.logger.debug('%s %s-processing image with shape %s',
+                             function_name.capitalize(), process_type,
+                             image.shape)
+    except Exception as err:  # pylint: disable=broad-except
+        errmsg = 'Failed to convert JSON response to np.array due to %s: %s'
+        app.logger.error(errmsg % (type(err).__name__), err)
         return jsonify({'error': errmsg}), 400
 
     try:
-        processed = [F(i) for i in images]
-        return jsonify({'processed': [p.tolist() for p in processed]}), 200
-    except Exception as err:
-        errmsg = 'Error applying {} post-processing: {}'.format(
-            function_name, err)
+        processed = []
+        for i in images:
+            p = F(i)
+            processed.append(p.tolist())
+            app.logger.debug('%s %s-processed image with shape %s',
+                             function_name.capitalize(), process_type, p.shape)
+        return jsonify({'processed': processed}), 200
+    except Exception as err:  # pylint: disable=broad-except
+        errmsg = '{} applying {} {}-processing: {}'.format(
+            type(err).__name__, function_name, process_type, err)
         app.logger.error(errmsg)
         return jsonify({'error': errmsg}), 500
 
