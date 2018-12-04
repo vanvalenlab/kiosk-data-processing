@@ -40,6 +40,7 @@ def _get_image(img_h=300, img_w=300):
     img = np.random.rand(img_w, img_h) * variance + bias
     return img
 
+
 class TestPreProcessing(object):
 
     def test_normalize(self):
