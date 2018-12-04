@@ -28,9 +28,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import os
-import json
-import errno
 import logging
 
 from decouple import config
@@ -38,7 +35,6 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import numpy as np
 
-from data_processing import settings
 from data_processing.utils import get_function
 
 
