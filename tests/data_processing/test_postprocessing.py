@@ -23,21 +23,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-"""Settings file to hold environment variabls and constants"""
+"""Tests for post-processing functions"""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import data_processing
+import numpy as np
+
+from data_processing import postprocessing
 
 
-PROCESSING_FUNCTIONS = {
-    'pre': {
-        'normalize': data_processing.preprocessing.noramlize,
-    },
-    'post': {
-        'deepcell': data_processing.postprocessing.deepcell,
-        'mibi': data_processing.postprocessing.mibi,
-        'watershed': data_processing.postprocessing.watershed
-    },
-}
+class TestPostProcessing(object):
+
+    def test_mibi(self):
+        channels = 3
+        img = np.random.rand(300, 300, channels)
+        mibi_img = postprocessing.mibi(img)
+        np.testing.assert_equal(mibi_img.shape, (300, 300, 1))
+
+    def test_deepcell(self):
+        channels = 4
+        img = np.random.rand(300, 300, channels)
+        deepcell_img = postprocessing.deepcell(img)
+        np.testing.assert_equal(deepcell_img.shape, (300, 300, 1))
+
+    def test_watershed(self):
+        channels = np.random.randint(4, 8)
+        img = np.random.rand(300, 300, channels)
+        watershed_img = postprocessing.watershed(img)
+        np.testing.assert_equal(watershed_img.shape, (300, 300, 1))

@@ -36,5 +36,5 @@ def noramlize(image):
     # Returns:
         normal_image: normalized image data
     """
-    normal_image = image * 255.0 / image.max()
+    normal_image = (image - image.mean()) / image.std()
     return normal_image

@@ -23,21 +23,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-"""Settings file to hold environment variabls and constants"""
+"""Tests for utility functions"""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import data_processing
+import pytest
+import numpy as np
+
+from data_processing import utils
+from data_processing import preprocessing, postprocessing
 
 
-PROCESSING_FUNCTIONS = {
-    'pre': {
-        'normalize': data_processing.preprocessing.noramlize,
-    },
-    'post': {
-        'deepcell': data_processing.postprocessing.deepcell,
-        'mibi': data_processing.postprocessing.mibi,
-        'watershed': data_processing.postprocessing.watershed
-    },
-}
+class TestUtils(object):
+
+    def test_get_function(self):
+        big = utils.get_function('PRE', 'NORMALIZE')
+        small = utils.get_function('pre', 'normalize')
+        mixed = utils.get_function('pRe', 'nOrmAliZe')
+        np.testing.assert_equal(big, small)
+        np.testing.assert_equal(big, mixed)
+        with pytest.raises(KeyError):
+            _ = utils.get_function('bad', 'normalize')
+        with pytest.raises(KeyError):
+            _ = utils.get_function('post', 'bad')

@@ -23,21 +23,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-"""Settings file to hold environment variabls and constants"""
+"""Tests for pre-processing functions"""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import data_processing
+import pytest
+import numpy as np
+
+from data_processing import preprocessing
 
 
-PROCESSING_FUNCTIONS = {
-    'pre': {
-        'normalize': data_processing.preprocessing.noramlize,
-    },
-    'post': {
-        'deepcell': data_processing.postprocessing.deepcell,
-        'mibi': data_processing.postprocessing.mibi,
-        'watershed': data_processing.postprocessing.watershed
-    },
-}
+def _get_image(img_h=300, img_w=300):
+    bias = np.random.rand(img_w, img_h) * 64
+    variance = np.random.rand(img_w, img_h) * (255 - 64)
+    img = np.random.rand(img_w, img_h) * variance + bias
+    return img
+
+
+class TestPreProcessing(object):
+
+    def test_normalize(self):
+        height, width = 300, 300
+        img = _get_image(height, width)
+        normalized_img = preprocessing.noramlize(img)
+        np.testing.assert_almost_equal(normalized_img.mean(), 0)
+        np.testing.assert_almost_equal(normalized_img.var(), 1)

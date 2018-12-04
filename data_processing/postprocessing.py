@@ -50,8 +50,9 @@ def mibi(prediction, edge_threshold=.25, interior_threshold=.25):
         copy = np.copy(array)
         for _ in range(0, num_dilations):
             dilated = morphology.dilation(copy)
-            # if still within the mask range AND one cell not eating another, dilate
-            copy = np.where((mask != 0 ) & (dilated != copy) & (copy == 0), dilated, copy)
+            # dilate if still in mask range not in another cell
+            copy = np.where((mask != 0) & (dilated != copy) & (copy == 0),
+                            dilated, copy)
         return copy
 
     def dilate_nomask(array, num_dilations):
