@@ -92,13 +92,7 @@ def process(process_type, function_name):
         return jsonify({'error': errmsg}), 400
 
     try:
-        images = []
-        for i in request_json['instances']:
-            image = np.array(i['image'])
-            images.append(image)
-            app.logger.debug('%s %s-processing image with shape %s',
-                             function_name.capitalize(), process_type,
-                             image.shape)
+        images = [np.array(i['image']) for i in request_json['instances']]
     except Exception as err:  # pylint: disable=broad-except
         errmsg = 'Failed to convert JSON response to np.array due to %s: %s'
         app.logger.error(errmsg % (type(err).__name__), err)
@@ -106,11 +100,18 @@ def process(process_type, function_name):
 
     try:
         processed = []
-        for i in images:
-            p = F(i)
-            processed.append(p.tolist())
+        for image in images:
+            app.logger.debug('%s %s-processing image with shape %s',
+                             function_name.capitalize(), process_type,
+                             image.shape)
+
+            processed_img = F(image)
+            processed.append(processed_img.tolist())
+
             app.logger.debug('%s %s-processed image with shape %s',
-                             function_name.capitalize(), process_type, p.shape)
+                             function_name.capitalize(), process_type,
+                             processed_img.shape)
+
         return jsonify({'processed': processed}), 200
     except Exception as err:  # pylint: disable=broad-except
         errmsg = '{} applying {} {}-processing: {}'.format(
