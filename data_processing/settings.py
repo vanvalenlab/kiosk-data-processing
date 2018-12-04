@@ -33,7 +33,7 @@ import data_processing
 
 PROCESSING_FUNCTIONS = {
     'pre': {
-        'noramlize': data_processing.preprocessing.noramlize,
+        'normalize': data_processing.preprocessing.noramlize,
     },
     'post': {
         'deepcell': data_processing.postprocessing.deepcell,
