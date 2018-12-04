@@ -49,14 +49,6 @@ if __name__ != '__main__':
     app.logger.setLevel(gunicorn_logger.level)
 
 
-@app.before_first_request
-def setup_logging():
-    """Set up logging to send INFO to stderr"""
-    if not app.debug:
-        # In production mode, add log handler to sys.stderr.
-        app.logger.setLevel(logging.INFO)
-
-
 @app.route('/health', methods=['GET'])
 def health():
     """Health check end-point"""
