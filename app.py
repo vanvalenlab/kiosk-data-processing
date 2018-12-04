@@ -28,9 +28,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import os
-import json
-import errno
 import logging
 
 from decouple import config
@@ -38,7 +35,6 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import numpy as np
 
-from data_processing import settings
 from data_processing.utils import get_function
 
 
@@ -47,12 +43,10 @@ app = Flask(__name__)
 CORS(app)
 
 
-@app.before_first_request
-def setup_logging():
-    """Set up logging to send INFO to stderr"""
-    if not app.debug:
-        # In production mode, add log handler to sys.stderr.
-        app.logger.setLevel(logging.INFO)
+if __name__ != '__main__':
+    gunicorn_logger = logging.getLogger('gunicorn.error')
+    app.logger.handlers = gunicorn_logger.handlers
+    app.logger.setLevel(gunicorn_logger.level)
 
 
 @app.route('/health', methods=['GET'])
@@ -80,24 +74,36 @@ def process(process_type, function_name):
     try:
         # second, verify the post request data
         request_json = request.get_json(force=True)
-    except Exception as err:
+    except Exception as err:  # pylint: disable=broad-except
         errmsg = 'Malformed JSON: {}'.format(err)
         app.logger.error(errmsg)
         return jsonify({'error': errmsg}), 400
 
     try:
-        images = [np.array(d['image']) for d in request_json['instances']]
-    except Exception as err:
-        errmsg = 'Could not process JSON data as images: {}'.format(err)
-        app.logger.error(errmsg)
+        images = [np.array(i['image']) for i in request_json['instances']]
+    except Exception as err:  # pylint: disable=broad-except
+        errmsg = 'Failed to convert JSON response to np.array due to %s: %s'
+        app.logger.error(errmsg % (type(err).__name__), err)
         return jsonify({'error': errmsg}), 400
 
     try:
-        processed = [F(i) for i in images]
-        return jsonify({'processed': [p.tolist() for p in processed]}), 200
-    except Exception as err:
-        errmsg = 'Error applying {} post-processing: {}'.format(
-            function_name, err)
+        processed = []
+        for image in images:
+            app.logger.debug('%s %s-processing image with shape %s',
+                             function_name.capitalize(), process_type,
+                             image.shape)
+
+            processed_img = F(image)
+            processed.append(processed_img.tolist())
+
+            app.logger.debug('%s %s-processed image with shape %s',
+                             function_name.capitalize(), process_type,
+                             processed_img.shape)
+
+        return jsonify({'processed': processed}), 200
+    except Exception as err:  # pylint: disable=broad-except
+        errmsg = '{} applying {} {}-processing: {}'.format(
+            type(err).__name__, function_name, process_type, err)
         app.logger.error(errmsg)
         return jsonify({'error': errmsg}), 500
 

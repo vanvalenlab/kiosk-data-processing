@@ -28,11 +28,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import logging
-
-
-logger = logging.getLogger()
-
 
 def noramlize(image):
     """Normalize image data by dividing by the maximum pixel value

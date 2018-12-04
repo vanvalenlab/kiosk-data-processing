@@ -28,15 +28,10 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import logging
-
 import numpy as np
 from skimage import morphology
 from skimage.feature import peak_local_max
 from skimage.measure import label
-
-
-logger = logging.getLogger()
 
 
 def mibi(prediction, edge_threshold=.25, interior_threshold=.25):
@@ -120,9 +115,6 @@ def watershed(image, min_distance=10, threshold_abs=0.05):
     # Returns:
         image mask where each cell is annotated uniquely
     """
-    logger.debug('performing watershed segmentation postprocessing '
-                        'on image with shape %s', image.shape)
-
     distance = np.argmax(image, axis=-1)
     labels = (distance > 0).astype('int')
 
