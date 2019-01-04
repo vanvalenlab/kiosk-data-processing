@@ -23,7 +23,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-FROM python:3.6
+FROM python:2.7
 
 WORKDIR /usr/src/app
 
@@ -35,4 +35,4 @@ ENV LISTEN_PORT=8080
 
 COPY . .
 
-ENTRYPOINT [ "python server.py" ]
+ENTRYPOINT [ "python", "server.py" ]
