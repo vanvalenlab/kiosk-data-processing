@@ -67,26 +67,3 @@ def test_watershed():
     img = np.random.rand(300, 300, channels)
     watershed_img = processing.watershed(img)
     np.testing.assert_equal(watershed_img.shape, (300, 300, 1))
-
-
-class TestPostProcessing(object):
-
-    
-
-    def test_mibi(self):
-        channels = 3
-        img = np.random.rand(300, 300, channels)
-        mibi_img = postprocessing.mibi(img)
-        np.testing.assert_equal(mibi_img.shape, (300, 300, 1))
-
-    def test_deepcell(self):
-        channels = 4
-        img = np.random.rand(300, 300, channels)
-        deepcell_img = postprocessing.deepcell(img)
-        np.testing.assert_equal(deepcell_img.shape, (300, 300, 1))
-
-    def test_watershed(self):
-        channels = np.random.randint(4, 8)
-        img = np.random.rand(300, 300, channels)
-        watershed_img = postprocessing.watershed(img)
-        np.testing.assert_equal(watershed_img.shape, (300, 300, 1))
