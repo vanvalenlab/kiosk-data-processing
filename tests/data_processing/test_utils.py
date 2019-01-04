@@ -31,11 +31,37 @@ from __future__ import print_function
 import pytest
 import numpy as np
 
+from data_processing.pbs import types_pb2
+from data_processing.pbs.tensor_pb2 import TensorProto
+from data_processing.pbs.process_pb2 import ProcessRequest
+from data_processing.pbs.process_pb2 import ProcessResponse
 from data_processing import utils
-from data_processing import preprocessing, postprocessing
+
+
+def _get_image(img_h=300, img_w=300, channels=1):
+    bias = np.random.rand(img_w, img_h, channels) * 64
+    variance = np.random.rand(img_w, img_h, channels) * (255 - 64)
+    img = np.random.rand(img_w, img_h, channels) * variance + bias
+    return img
 
 
 class TestUtils(object):
+
+    def test_make_tensor_proto(self):
+        # test with numpy array
+        data = _get_image(300, 300, 1)
+        proto = utils.make_tensor_proto(data, 'DT_FLOAT')
+        assert isinstance(proto, (TensorProto,))
+        # test with value
+        data = 10.0
+        proto = utils.make_tensor_proto(data, types_pb2.DT_FLOAT)
+        assert isinstance(proto, (TensorProto,))
+
+    def test_protobuf_request_to_dict(self):
+        # TODO: how to fill up a dummy PredictResponse?
+        request = ProcessRequest()
+        request_dict = utils.protobuf_request_to_dict(request)
+        assert isinstance(request_dict, (dict,))
 
     def test_get_function(self):
         big = utils.get_function('PRE', 'NORMALIZE')
