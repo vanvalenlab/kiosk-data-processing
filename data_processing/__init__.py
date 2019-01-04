@@ -28,13 +28,12 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from data_processing import preprocessing
-from data_processing import postprocessing
+from data_processing import processing
 
-from data_processing.preprocessing import noramlize
-from data_processing.postprocessing import deepcell
-from data_processing.postprocessing import mibi
-from data_processing.postprocessing import watershed
+from data_processing.processing import noramlize
+from data_processing.processing import deepcell
+from data_processing.processing import mibi
+from data_processing.processing import watershed
 
 del absolute_import
 del division

@@ -30,10 +30,48 @@ from __future__ import print_function
 
 import numpy as np
 
-from data_processing import postprocessing
+from data_processing import processing
+
+
+def _get_image(img_h=300, img_w=300):
+    bias = np.random.rand(img_w, img_h) * 64
+    variance = np.random.rand(img_w, img_h) * (255 - 64)
+    img = np.random.rand(img_w, img_h) * variance + bias
+    return img
+
+
+def test_normalize():
+    height, width = 300, 300
+    img = _get_image(height, width)
+    normalized_img = processing.noramlize(img)
+    np.testing.assert_almost_equal(normalized_img.mean(), 0)
+    np.testing.assert_almost_equal(normalized_img.var(), 1)
+
+
+def test_mibi():
+    channels = 3
+    img = np.random.rand(300, 300, channels)
+    mibi_img = processing.mibi(img)
+    np.testing.assert_equal(mibi_img.shape, (300, 300, 1))
+
+
+def test_deepcell():
+    channels = 4
+    img = np.random.rand(300, 300, channels)
+    deepcell_img = processing.deepcell(img)
+    np.testing.assert_equal(deepcell_img.shape, (300, 300, 1))
+
+
+def test_watershed():
+    channels = np.random.randint(4, 8)
+    img = np.random.rand(300, 300, channels)
+    watershed_img = processing.watershed(img)
+    np.testing.assert_equal(watershed_img.shape, (300, 300, 1))
 
 
 class TestPostProcessing(object):
+
+    
 
     def test_mibi(self):
         channels = 3

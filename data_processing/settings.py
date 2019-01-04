@@ -28,16 +28,16 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import data_processing
+from data_processing import processing
 
 
 PROCESSING_FUNCTIONS = {
     'pre': {
-        'normalize': data_processing.preprocessing.noramlize,
+        'normalize': processing.noramlize,
     },
     'post': {
-        'deepcell': data_processing.postprocessing.deepcell,
-        'mibi': data_processing.postprocessing.mibi,
-        'watershed': data_processing.postprocessing.watershed
+        'deepcell': processing.deepcell,
+        'mibi': processing.mibi,
+        'watershed': processing.watershed
     },
 }
