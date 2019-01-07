@@ -1,4 +1,4 @@
-# Copyright 2016-2018 The Van Valen Lab at the California Institute of
+# Copyright 2016-2019 The Van Valen Lab at the California Institute of
 # Technology (Caltech), with support from the Paul Allen Family Foundation,
 # Google, & National Institutes of Health (NIH) under Grant U24CA224309-01.
 # All rights reserved.
@@ -28,16 +28,16 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import data_processing
+from data_processing import processing
 
 
 PROCESSING_FUNCTIONS = {
     'pre': {
-        'normalize': data_processing.preprocessing.noramlize,
+        'normalize': processing.noramlize,
     },
     'post': {
-        'deepcell': data_processing.postprocessing.deepcell,
-        'mibi': data_processing.postprocessing.mibi,
-        'watershed': data_processing.postprocessing.watershed
+        'deepcell': processing.deepcell,
+        'mibi': processing.mibi,
+        'watershed': processing.watershed
     },
 }

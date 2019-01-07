@@ -1,4 +1,4 @@
-# Copyright 2016-2018 The Van Valen Lab at the California Institute of
+# Copyright 2016-2019 The Van Valen Lab at the California Institute of
 # Technology (Caltech), with support from the Paul Allen Family Foundation,
 # Google, & National Institutes of Health (NIH) under Grant U24CA224309-01.
 # All rights reserved.
@@ -31,11 +31,58 @@ from __future__ import print_function
 import pytest
 import numpy as np
 
+from data_processing.pbs import types_pb2
+from data_processing.pbs.tensor_pb2 import TensorProto
+from data_processing.pbs.process_pb2 import ProcessRequest
+from data_processing.pbs.process_pb2 import ProcessResponse
 from data_processing import utils
-from data_processing import preprocessing, postprocessing
+
+
+def _get_image(img_h=300, img_w=300, channels=1):
+    bias = np.random.rand(img_w, img_h, channels) * 64
+    variance = np.random.rand(img_w, img_h, channels) * (255 - 64)
+    img = np.random.rand(img_w, img_h, channels) * variance + bias
+    return img
 
 
 class TestUtils(object):
+
+    def test_make_tensor_proto(self):
+        # test with numpy array
+        data = _get_image(300, 300, 1)
+        proto = utils.make_tensor_proto(data, 'DT_FLOAT')
+        assert isinstance(proto, (TensorProto,))
+        # test with value
+        data = 10.0
+        proto = utils.make_tensor_proto(data, types_pb2.DT_FLOAT)
+        assert isinstance(proto, (TensorProto,))
+
+    def test_protobuf_request_to_dict(self):
+        # test valid request
+        data = _get_image(300, 300, 1)
+        tensor_proto = utils.make_tensor_proto(data, 'DT_FLOAT')
+        request = ProcessRequest()
+        request.inputs['prediction'].CopyFrom(tensor_proto)
+        request_dict = utils.protobuf_request_to_dict(request)
+        assert isinstance(request_dict, (dict,))
+        np.testing.assert_allclose(request_dict['prediction'], data)
+        # test scalar input
+        data = 3
+        tensor_proto = utils.make_tensor_proto(data, 'DT_FLOAT')
+        request = ProcessRequest()
+        request.inputs['prediction'].CopyFrom(tensor_proto)
+        request_dict = utils.protobuf_request_to_dict(request)
+        assert isinstance(request_dict, (dict,))
+        np.testing.assert_allclose(request_dict['prediction'], data)
+        # test bad dtype
+        # logs an error, but should throw a KeyError as well.
+        data = _get_image(300, 300, 1)
+        tensor_proto = utils.make_tensor_proto(data, 'DT_FLOAT')
+        request = ProcessRequest()
+        request.inputs['prediction'].CopyFrom(tensor_proto)
+        request.inputs['prediction'].dtype = 32
+        with pytest.raises(KeyError):
+            request_dict = utils.protobuf_request_to_dict(request)
 
     def test_get_function(self):
         big = utils.get_function('PRE', 'NORMALIZE')

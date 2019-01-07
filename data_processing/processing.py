@@ -1,4 +1,4 @@
-# Copyright 2016-2018 The Van Valen Lab at the California Institute of
+# Copyright 2016-2019 The Van Valen Lab at the California Institute of
 # Technology (Caltech), with support from the Paul Allen Family Foundation,
 # Google, & National Institutes of Health (NIH) under Grant U24CA224309-01.
 # All rights reserved.
@@ -23,7 +23,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ============================================================================
-"""Functions for post-processing predictions from tf-serving"""
+"""Functions for pre- and post-processing image data"""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -32,6 +32,17 @@ import numpy as np
 from skimage import morphology
 from skimage.feature import peak_local_max
 from skimage.measure import label
+
+
+def noramlize(image):
+    """Normalize image data by dividing by the maximum pixel value
+    # Arguments:
+        image: numpy array of image data
+    # Returns:
+        normal_image: normalized image data
+    """
+    normal_image = (image - image.mean()) / image.std()
+    return normal_image
 
 
 def mibi(prediction, edge_threshold=.25, interior_threshold=.25):
@@ -144,6 +155,8 @@ def deepcell(prediction, threshold=.8):
     # Returns:
         post-processed data with each cell uniquely annotated
     """
+    if prediction.shape[0] == 1:
+        prediction = np.squeeze(prediction, axis=0)
     interior = prediction[..., 2] > threshold
     data = np.expand_dims(interior, axis=-1)
     labeled = label(data)
