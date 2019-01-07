@@ -35,3 +35,5 @@ install:
 # command to run tests
 script:
   - PYTHONPATH=$PWD:$PYTHONPATH python -m pytest --cov=data_processing --pep8 data_processing tests
+after_success:
+  - coveralls
