@@ -91,6 +91,61 @@ class ProcessingServicer(processing_service_pb2_grpc.ProcessingServiceServicer):
         _logger.info('Prepared response object in %s s', time.time() - t)
         return response
 
+    def StreamProcess(self, request_iterator, context):
+        """Enable client to stream large payload for processing"""
+        _logger = logging.getLogger('ProcessingServicer.StreamProcess')
+
+        # intialize values.  should be same in each request.
+        F = None
+        shape = None  # need the shape as frombytes will laoad the data as 1D
+        dtype = None  # need the dtype in case it is not `float`
+        arrbytes = []
+
+        t = time.time()
+        # get all the bytes from every request
+        for request in request_iterator:
+            shape = tuple(request.shape)
+            dtype = str(request.dtype)
+            F = get_function(request.function_spec.type,
+                             request.function_spec.name)
+            data = request.inputs['data']
+            arrbytes.append(data)
+
+        npbytes = b''.join(arrbytes)
+        _logger.info('Got client stream of %s bytes', len(npbytes))
+
+        t = time.time()
+        image = np.frombuffer(npbytes, dtype=dtype).reshape(shape)
+        _logger.info('Loaded data into numpy array with shape %s in %s s',
+                     image.shape, time.time() - t)
+
+        t = time.time()
+        processed_image = F(image)
+
+        processed_shape = processed_image.shape  # to reshape client-side
+        _logger.info('%s processed %s data into shape %s in %s s',
+                     str(F.__name__).capitalize(), processed_image.dtype,
+                     processed_shape, time.time() - t)
+
+        # Send the numpy array back in responses of `chunk_size` bytes
+        chunk_size = 4 * 1024 * 1024  # 4 MB
+        bytearr = processed_image.tobytes()  # the bytes to stream back
+        _t = time.time()
+        for i, j in enumerate(range(0, len(bytearr), chunk_size)):
+            _logger.info('Streaming %s / %s bytes',
+                         (i + 1) * chunk_size, len(bytearr))
+            t = time.time()
+            response = process_pb2.ChunkedProcessResponse()
+            # pylint: disable=E1101
+            response.shape[:] = processed_shape
+            response.outputs['data'] = bytearr[j: j + chunk_size]
+            response.dtype = str(processed_image.dtype)
+            # pylint: enable=E1101
+            _logger.debug('Creating response object took: %s', time.time() - t)
+            yield response
+
+        _logger.info('Finished all responses in: %s s', time.time() - _t)
+
 
 if __name__ == '__main__':
     initialize_logger()
