@@ -149,30 +149,30 @@ class ProcessingServicer(processing_service_pb2_grpc.ProcessingServiceServicer):
 
 if __name__ == '__main__':
     initialize_logger()
-    _logger = logging.getLogger()
+    LOGGER = logging.getLogger()
     LISTEN_PORT = os.getenv('LISTEN_PORT', 8080)
 
     # define custom server options
-    options=[(cygrpc.ChannelArgKey.max_send_message_length, -1),
-             (cygrpc.ChannelArgKey.max_receive_message_length, -1)]
+    OPTIONS = [(cygrpc.ChannelArgKey.max_send_message_length, -1),
+               (cygrpc.ChannelArgKey.max_receive_message_length, -1)]
 
     # create a gRPC server with custom options
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10),
-                         options=options)
+    SERVER = grpc.server(futures.ThreadPoolExecutor(max_workers=10),
+                         options=OPTIONS)
 
     # use the generated function `add_ProcessingServicer_to_server`
     # to add the defined class to the server
     processing_service_pb2_grpc.add_ProcessingServiceServicer_to_server(
-        ProcessingServicer(), server)
+        ProcessingServicer(), SERVER)
 
-    _logger.info('Starting server. Listening on port %s', LISTEN_PORT)
-    server.add_insecure_port('[::]:{}'.format(LISTEN_PORT))
-    server.start()
+    LOGGER.info('Starting server. Listening on port %s', LISTEN_PORT)
+    SERVER.add_insecure_port('[::]:{}'.format(LISTEN_PORT))
+    SERVER.start()
 
-    # since server.start() will not block,
+    # since SERVER.start() will not block,
     # a sleep-loop is added to keep alive
     try:
         while True:
             time.sleep(86400)  # 24 hours
     except KeyboardInterrupt:
-        server.stop(0)
+        SERVER.stop(0)
