@@ -75,12 +75,12 @@ class ProcessingServicer(processing_service_pb2_grpc.ProcessingServiceServicer):
         t = time.time()
         data = protobuf_request_to_dict(request)
         image = data['image']
-        _logger.info('Loaded data into numpy array with shape %s in %s s',
+        _logger.info('Loaded data into numpy array with shape %s in %ss',
                      image.shape, time.time() - t)
 
         t = time.time()
         processed_image = F(image)
-        _logger.info('%s processed data into shape %s in %s s',
+        _logger.info('%s processed data into shape %s in %ss',
                      str(F.__name__).capitalize(), processed_image.shape,
                      time.time() - t)
 
@@ -88,7 +88,7 @@ class ProcessingServicer(processing_service_pb2_grpc.ProcessingServiceServicer):
         response = process_pb2.ProcessResponse()
         tensor_proto = make_tensor_proto(processed_image, 'DT_INT32')
         response.outputs['results'].CopyFrom(tensor_proto)  # pylint: disable=E1101
-        _logger.info('Prepared response object in %s s', time.time() - t)
+        _logger.info('Prepared response object in %ss', time.time() - t)
         return response
 
     def StreamProcess(self, request_iterator, context):
@@ -116,14 +116,14 @@ class ProcessingServicer(processing_service_pb2_grpc.ProcessingServiceServicer):
 
         t = time.time()
         image = np.frombuffer(npbytes, dtype=dtype).reshape(shape)
-        _logger.info('Loaded data into numpy array with shape %s in %s s',
+        _logger.info('Loaded data into numpy array with shape %s in %ss',
                      image.shape, time.time() - t)
 
         t = time.time()
         processed_image = F(image)
 
         processed_shape = processed_image.shape  # to reshape client-side
-        _logger.info('%s processed %s data into shape %s in %s s',
+        _logger.info('%s processed %s data into shape %s in %ss',
                      str(F.__name__).capitalize(), processed_image.dtype,
                      processed_shape, time.time() - t)
 
@@ -144,7 +144,7 @@ class ProcessingServicer(processing_service_pb2_grpc.ProcessingServiceServicer):
             _logger.debug('Creating response object took: %s', time.time() - t)
             yield response
 
-        _logger.info('Finished all responses in: %s s', time.time() - _t)
+        _logger.info('Finished all responses in: %ss', time.time() - _t)
 
 
 if __name__ == '__main__':
