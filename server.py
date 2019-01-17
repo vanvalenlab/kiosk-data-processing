@@ -28,18 +28,18 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+from concurrent import futures
+
 import os
 import sys
 import time
 import logging
 
+import numpy as np
 import grpc
 from grpc._cython import cygrpc
-from concurrent import futures
-from dict_to_protobuf import dict_to_protobuf
 
 from data_processing.pbs import process_pb2
-from data_processing.pbs import processing_service_pb2
 from data_processing.pbs import processing_service_pb2_grpc
 from data_processing.utils import get_function
 from data_processing.utils import protobuf_request_to_dict
@@ -47,6 +47,7 @@ from data_processing.utils import make_tensor_proto
 
 
 def initialize_logger(debug_mode=False):
+    """Sets up the logger"""
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
 
@@ -67,7 +68,7 @@ class ProcessingServicer(processing_service_pb2_grpc.ProcessingServiceServicer):
 
     def Process(self, request, context):
         """Expose Process() and all the `data_processing` functions"""
-        _logger = logging.getLogger()
+        _logger = logging.getLogger('ProcessingServicer.Process')
         F = get_function(request.function_spec.type,
                          request.function_spec.name)
 
