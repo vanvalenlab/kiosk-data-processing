@@ -72,12 +72,23 @@ class ProcessingServicer(processing_service_pb2_grpc.ProcessingServiceServicer):
         F = get_function(request.function_spec.type,
                          request.function_spec.name)
 
+        t = time.time()
         data = protobuf_request_to_dict(request)
-        results = [{'results': F(data['image'])}]
+        image = data['image']
+        _logger.info('Loaded data into numpy array with shape %s in %s s',
+                     image.shape, time.time() - t)
+
+        t = time.time()
+        processed_image = F(image)
+        _logger.info('%s processed data into shape %s in %s s',
+                     str(F.__name__).capitalize(), processed_image.shape,
+                     time.time() - t)
+
+        t = time.time()
         response = process_pb2.ProcessResponse()
-        for d in results:
-            tensor_proto = make_tensor_proto(d['results'], 'DT_INT32')
-            response.outputs['results'].CopyFrom(tensor_proto)
+        tensor_proto = make_tensor_proto(processed_image, 'DT_INT32')
+        response.outputs['results'].CopyFrom(tensor_proto)  # pylint: disable=E1101
+        _logger.info('Prepared response object in %s s', time.time() - t)
         return response
 
 
