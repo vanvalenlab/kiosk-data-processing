@@ -112,7 +112,7 @@ class ProcessingServicer(processing_service_pb2_grpc.ProcessingServiceServicer):
             arrbytes.append(data)
 
         npbytes = b''.join(arrbytes)
-        _logger.info('Got client stream of %s bytes', len(npbytes))
+        _logger.info('Got client request stream of %s bytes', len(npbytes))
 
         t = time.time()
         image = np.frombuffer(npbytes, dtype=dtype).reshape(shape)
@@ -121,30 +121,27 @@ class ProcessingServicer(processing_service_pb2_grpc.ProcessingServiceServicer):
 
         t = time.time()
         processed_image = F(image)
-
         processed_shape = processed_image.shape  # to reshape client-side
         _logger.info('%s processed %s data into shape %s in %ss',
                      str(F.__name__).capitalize(), processed_image.dtype,
                      processed_shape, time.time() - t)
 
         # Send the numpy array back in responses of `chunk_size` bytes
-        chunk_size = 4 * 1024 * 1024  # 4 MB
+        t = time.time()
+        chunk_size = 64 * 1024  # 64 kB is recommended payload size
         bytearr = processed_image.tobytes()  # the bytes to stream back
-        _t = time.time()
-        for i, j in enumerate(range(0, len(bytearr), chunk_size)):
-            _logger.info('Streaming %s / %s bytes',
-                         (i + 1) * chunk_size, len(bytearr))
-            t = time.time()
+        _logger.info('Streaming %s bytes in %s responses',
+                     len(bytearr), chunk_size % len(bytearr))
+        for i in range(0, len(bytearr), chunk_size):
             response = process_pb2.ChunkedProcessResponse()
             # pylint: disable=E1101
             response.shape[:] = processed_shape
-            response.outputs['data'] = bytearr[j: j + chunk_size]
+            response.outputs['data'] = bytearr[i: i + chunk_size]
             response.dtype = str(processed_image.dtype)
             # pylint: enable=E1101
-            _logger.debug('Creating response object took: %s', time.time() - t)
             yield response
 
-        _logger.info('Finished all responses in: %ss', time.time() - _t)
+        _logger.info('Streamed %s bytes in %ss', len(bytearr), time.time() - t)
 
 
 if __name__ == '__main__':
