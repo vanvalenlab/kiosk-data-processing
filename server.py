@@ -151,13 +151,14 @@ if __name__ == '__main__':
     initialize_logger()
     LOGGER = logging.getLogger()
     LISTEN_PORT = os.getenv('LISTEN_PORT', 8080)
+    WORKERS = int(os.getenv('WORKERS', 10))
 
     # define custom server options
     OPTIONS = [(cygrpc.ChannelArgKey.max_send_message_length, -1),
                (cygrpc.ChannelArgKey.max_receive_message_length, -1)]
 
     # create a gRPC server with custom options
-    SERVER = grpc.server(futures.ThreadPoolExecutor(max_workers=10),
+    SERVER = grpc.server(futures.ThreadPoolExecutor(max_workers=WORKERS),
                          options=OPTIONS)
 
     # use the generated function `add_ProcessingServicer_to_server`
