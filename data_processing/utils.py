@@ -32,8 +32,7 @@ import logging
 
 import six
 import numpy as np
-
-from dict_to_protobuf import dict_to_protobuf
+import dict_to_protobuf
 
 from data_processing.pbs.tensor_pb2 import TensorProto
 from data_processing.pbs.types_pb2 import DESCRIPTOR
@@ -107,7 +106,7 @@ def make_tensor_proto(data, dtype):
         number_to_dtype_value[dtype]: values
     }
 
-    dict_to_protobuf(tensor_proto_dict, tensor_proto)
+    dict_to_protobuf.dict_to_protobuf(tensor_proto_dict, tensor_proto)
 
     return tensor_proto
 
