@@ -33,6 +33,7 @@ from concurrent import futures
 import os
 import sys
 import time
+import timeit
 import logging
 
 import numpy as np
@@ -72,23 +73,24 @@ class ProcessingServicer(processing_service_pb2_grpc.ProcessingServiceServicer):
         F = get_function(request.function_spec.type,
                          request.function_spec.name)
 
-        t = time.time()
+        t = timeit.default_timer()
         data = protobuf_request_to_dict(request)
         image = data['image']
-        _logger.info('Loaded data into numpy array with shape %s in %ss',
-                     image.shape, time.time() - t)
+        _logger.info('Loaded data into numpy array of shape %s in %s seconds.',
+                     image.shape, timeit.default_timer() - t)
 
-        t = time.time()
+        t = timeit.default_timer()
         processed_image = F(image)
-        _logger.info('%s processed data into shape %s in %ss',
+        _logger.info('%s processed data into shape %s in %s seconds.',
                      str(F.__name__).capitalize(), processed_image.shape,
-                     time.time() - t)
+                     timeit.default_timer() - t)
 
-        t = time.time()
+        t = timeit.default_timer()
         response = process_pb2.ProcessResponse()
         tensor_proto = make_tensor_proto(processed_image, 'DT_INT32')
         response.outputs['results'].CopyFrom(tensor_proto)  # pylint: disable=E1101
-        _logger.info('Prepared response object in %ss', time.time() - t)
+        _logger.info('Prepared response object in %s seconds.',
+                     timeit.default_timer() - t)
         return response
 
     def StreamProcess(self, request_iterator, context):
@@ -101,7 +103,7 @@ class ProcessingServicer(processing_service_pb2_grpc.ProcessingServiceServicer):
         dtype = None  # need the dtype in case it is not `float`
         arrbytes = []
 
-        t = time.time()
+        t = timeit.default_timer()
         # get all the bytes from every request
         for request in request_iterator:
             shape = tuple(request.shape)
@@ -114,20 +116,20 @@ class ProcessingServicer(processing_service_pb2_grpc.ProcessingServiceServicer):
         npbytes = b''.join(arrbytes)
         _logger.info('Got client request stream of %s bytes', len(npbytes))
 
-        t = time.time()
+        t = timeit.default_timer()
         image = np.frombuffer(npbytes, dtype=dtype).reshape(shape)
-        _logger.info('Loaded data into numpy array with shape %s in %ss',
-                     image.shape, time.time() - t)
+        _logger.info('Loaded data into numpy array of shape %s in %s seconds.',
+                     image.shape, timeit.default_timer() - t)
 
-        t = time.time()
+        t = timeit.default_timer()
         processed_image = F(image)
         processed_shape = processed_image.shape  # to reshape client-side
-        _logger.info('%s processed %s data into shape %s in %ss',
+        _logger.info('%s processed %s data into shape %s in %s seconds.',
                      str(F.__name__).capitalize(), processed_image.dtype,
-                     processed_shape, time.time() - t)
+                     processed_shape, timeit.default_timer() - t)
 
         # Send the numpy array back in responses of `chunk_size` bytes
-        t = time.time()
+        t = timeit.default_timer()
         chunk_size = 64 * 1024  # 64 kB is recommended payload size
         bytearr = processed_image.tobytes()  # the bytes to stream back
         _logger.info('Streaming %s bytes in %s responses',
@@ -141,7 +143,8 @@ class ProcessingServicer(processing_service_pb2_grpc.ProcessingServiceServicer):
             # pylint: enable=E1101
             yield response
 
-        _logger.info('Streamed %s bytes in %ss', len(bytearr), time.time() - t)
+        _logger.info('Streamed %s bytes in %s seconds.',
+                     len(bytearr), timeit.default_timer() - t)
 
 
 if __name__ == '__main__':
