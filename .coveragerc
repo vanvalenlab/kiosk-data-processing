@@ -15,3 +15,4 @@ show_missing = True
 omit =
     data_processing/settings.py
     data_processing/pbs/*.py
+    data_processing/*_test.py
