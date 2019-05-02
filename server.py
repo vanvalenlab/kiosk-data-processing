@@ -41,7 +41,8 @@ import grpc
 from grpc._cython import cygrpc
 
 import prometheus_client
-from python_grpc_prometheus import prometheus_server_interceptor
+from py_grpc_prometheus import prometheus_server_interceptor
+# from python_grpc_prometheus import prometheus_server_interceptor
 
 from data_processing.pbs import process_pb2
 from data_processing.pbs import processing_service_pb2_grpc
