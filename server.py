@@ -163,7 +163,7 @@ if __name__ == '__main__':
     # Add the required interceptor(s) where you create your grpc server, e.g.
     PSI = prometheus_server_interceptor.PromServerInterceptor()
 
-    interceptors = (PSI,) if PROMETHEUS_ENABLED else ()
+    INTERCEPTORS = (PSI,) if PROMETHEUS_ENABLED else ()
 
     # define custom server options
     OPTIONS = [(cygrpc.ChannelArgKey.max_send_message_length, -1),
@@ -171,7 +171,7 @@ if __name__ == '__main__':
 
     # create a gRPC server with custom options
     SERVER = grpc.server(futures.ThreadPoolExecutor(max_workers=WORKERS),
-                         interceptors=interceptors,
+                         interceptors=INTERCEPTORS,
                          options=OPTIONS)
 
     # use the generated function `add_ProcessingServicer_to_server`
