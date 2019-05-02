@@ -155,7 +155,7 @@ if __name__ == '__main__':
     LOGGER = logging.getLogger(__name__)
     LISTEN_PORT = os.getenv('LISTEN_PORT', '8080')
     WORKERS = int(os.getenv('WORKERS', '10'))
-    PROMETHEUS_PORT = int(os.getenv('LISTEN_PORT', '8000'))
+    PROMETHEUS_PORT = int(os.getenv('PROMETHEUS_PORT', '8000'))
     PROMETHEUS_ENABLED = os.getenv('PROMETHEUS_ENABLED', 'true')
     PROMETHEUS_ENABLED = PROMETHEUS_ENABLED.lower() == 'true'
 
