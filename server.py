@@ -156,9 +156,13 @@ if __name__ == '__main__':
     LISTEN_PORT = os.getenv('LISTEN_PORT', '8080')
     WORKERS = int(os.getenv('WORKERS', '10'))
     PROMETHEUS_PORT = int(os.getenv('LISTEN_PORT', '8000'))
+    PROMETHEUS_ENABLED = os.getenv('PROMETHEUS_ENABLED', 'true')
+    PROMETHEUS_ENABLED = PROMETHEUS_ENABLED.lower() == 'true'
 
     # Add the required interceptor(s) where you create your grpc server, e.g.
     PSI = prometheus_server_interceptor.PromServerInterceptor()
+
+    interceptors = (PSI,) if PROMETHEUS_ENABLED else ()
 
     # define custom server options
     OPTIONS = [(cygrpc.ChannelArgKey.max_send_message_length, -1),
@@ -166,7 +170,7 @@ if __name__ == '__main__':
 
     # create a gRPC server with custom options
     SERVER = grpc.server(futures.ThreadPoolExecutor(max_workers=WORKERS),
-                         interceptors=(PSI,),
+                         interceptors=interceptors,
                          options=OPTIONS)
 
     # use the generated function `add_ProcessingServicer_to_server`
@@ -175,8 +179,10 @@ if __name__ == '__main__':
         ProcessingServicer(), SERVER)
 
     # start the http server where prometheus can fetch the data from.
-    LOGGER.info('Starting prometheus. Listening on port %s', PROMETHEUS_PORT)
-    prometheus_client.start_http_server(PROMETHEUS_PORT)
+    if PROMETHEUS_ENABLED:
+        LOGGER.info('Starting prometheus server. Listening on port %s',
+                    PROMETHEUS_PORT)
+        prometheus_client.start_http_server(PROMETHEUS_PORT)
 
     LOGGER.info('Starting server. Listening on port %s', LISTEN_PORT)
     SERVER.add_insecure_port('[::]:{}'.format(LISTEN_PORT))
