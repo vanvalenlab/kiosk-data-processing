@@ -40,6 +40,10 @@ import numpy as np
 import grpc
 from grpc._cython import cygrpc
 
+import prometheus_client
+from py_grpc_prometheus import prometheus_server_interceptor
+# from python_grpc_prometheus import prometheus_server_interceptor
+
 from data_processing.pbs import process_pb2
 from data_processing.pbs import processing_service_pb2_grpc
 from data_processing.utils import get_function
@@ -149,9 +153,17 @@ class ProcessingServicer(processing_service_pb2_grpc.ProcessingServiceServicer):
 
 if __name__ == '__main__':
     initialize_logger()
-    LOGGER = logging.getLogger()
-    LISTEN_PORT = os.getenv('LISTEN_PORT', 8080)
-    WORKERS = int(os.getenv('WORKERS', 10))
+    LOGGER = logging.getLogger(__name__)
+    LISTEN_PORT = os.getenv('LISTEN_PORT', '8080')
+    WORKERS = int(os.getenv('WORKERS', '10'))
+    PROMETHEUS_PORT = int(os.getenv('PROMETHEUS_PORT', '8000'))
+    PROMETHEUS_ENABLED = os.getenv('PROMETHEUS_ENABLED', 'true')
+    PROMETHEUS_ENABLED = PROMETHEUS_ENABLED.lower() == 'true'
+
+    # Add the required interceptor(s) where you create your grpc server, e.g.
+    PSI = prometheus_server_interceptor.PromServerInterceptor()
+
+    INTERCEPTORS = (PSI,) if PROMETHEUS_ENABLED else ()
 
     # define custom server options
     OPTIONS = [(cygrpc.ChannelArgKey.max_send_message_length, -1),
@@ -159,12 +171,19 @@ if __name__ == '__main__':
 
     # create a gRPC server with custom options
     SERVER = grpc.server(futures.ThreadPoolExecutor(max_workers=WORKERS),
+                         interceptors=INTERCEPTORS,
                          options=OPTIONS)
 
     # use the generated function `add_ProcessingServicer_to_server`
     # to add the defined class to the server
     processing_service_pb2_grpc.add_ProcessingServiceServicer_to_server(
         ProcessingServicer(), SERVER)
+
+    # start the http server where prometheus can fetch the data from.
+    if PROMETHEUS_ENABLED:
+        LOGGER.info('Starting prometheus server. Listening on port %s',
+                    PROMETHEUS_PORT)
+        prometheus_client.start_http_server(PROMETHEUS_PORT)
 
     LOGGER.info('Starting server. Listening on port %s', LISTEN_PORT)
     SERVER.add_insecure_port('[::]:{}'.format(LISTEN_PORT))

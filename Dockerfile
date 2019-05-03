@@ -31,7 +31,10 @@ COPY requirements.txt .
 
 RUN pip install -r requirements.txt
 
-ENV LISTEN_PORT=8080
+ENV LISTEN_PORT=8080 \
+    WORKERS=10 \
+    PROMETHEUS_ENABLED=true \
+    PROMETHEUS_PORT=8000
 
 COPY . .
 
