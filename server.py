@@ -156,8 +156,8 @@ class ProcessingServicer(processing_service_pb2_grpc.ProcessingServiceServicer):
 if __name__ == '__main__':
     initialize_logger()
     LOGGER = logging.getLogger(__name__)
-    LISTEN_PORT = config('LISTEN_PORT', '8080')
     WORKERS = int(multiprocessing.cpu_count())
+    LISTEN_PORT = config('LISTEN_PORT', default=8080, cast=int)
     PROMETHEUS_PORT = config('PROMETHEUS_PORT', default=8000, cast=int)
     PROMETHEUS_ENABLED = config('PROMETHEUS_ENABLED', default=True, cast=bool)
 
