@@ -30,6 +30,7 @@ from __future__ import print_function
 
 from concurrent import futures
 
+import multiprocessing
 import os
 import sys
 import time
@@ -155,10 +156,10 @@ if __name__ == '__main__':
     initialize_logger()
     LOGGER = logging.getLogger(__name__)
     LISTEN_PORT = os.getenv('LISTEN_PORT', '8080')
-    WORKERS = int(os.getenv('WORKERS', '10'))
     PROMETHEUS_PORT = int(os.getenv('PROMETHEUS_PORT', '8000'))
     PROMETHEUS_ENABLED = os.getenv('PROMETHEUS_ENABLED', 'true')
     PROMETHEUS_ENABLED = PROMETHEUS_ENABLED.lower() == 'true'
+    WORKERS = int(multiprocessing.cpu_count())
 
     # Add the required interceptor(s) where you create your grpc server, e.g.
     PSI = prometheus_server_interceptor.PromServerInterceptor()
