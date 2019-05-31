@@ -30,16 +30,17 @@ from __future__ import print_function
 
 from concurrent import futures
 
+import logging
 import multiprocessing
 import os
 import sys
 import time
 import timeit
-import logging
 
-import numpy as np
+from decouple import config
 import grpc
 from grpc._cython import cygrpc
+import numpy as np
 
 import prometheus_client
 from py_grpc_prometheus import prometheus_server_interceptor
