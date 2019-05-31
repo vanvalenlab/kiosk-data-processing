@@ -156,11 +156,10 @@ class ProcessingServicer(processing_service_pb2_grpc.ProcessingServiceServicer):
 if __name__ == '__main__':
     initialize_logger()
     LOGGER = logging.getLogger(__name__)
-    LISTEN_PORT = os.getenv('LISTEN_PORT', '8080')
-    PROMETHEUS_PORT = int(os.getenv('PROMETHEUS_PORT', '8000'))
-    PROMETHEUS_ENABLED = os.getenv('PROMETHEUS_ENABLED', 'true')
-    PROMETHEUS_ENABLED = PROMETHEUS_ENABLED.lower() == 'true'
+    LISTEN_PORT = config('LISTEN_PORT', '8080')
     WORKERS = int(multiprocessing.cpu_count())
+    PROMETHEUS_PORT = config('PROMETHEUS_PORT', default=8000, cast=int)
+    PROMETHEUS_ENABLED = config('PROMETHEUS_ENABLED', default=True, cast=bool)
 
     # Add the required interceptor(s) where you create your grpc server, e.g.
     PSI = prometheus_server_interceptor.PromServerInterceptor()
