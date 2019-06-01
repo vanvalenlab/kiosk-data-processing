@@ -30,15 +30,17 @@ from __future__ import print_function
 
 from concurrent import futures
 
+import logging
+import multiprocessing
 import os
 import sys
 import time
 import timeit
-import logging
 
-import numpy as np
+from decouple import config
 import grpc
 from grpc._cython import cygrpc
+import numpy as np
 
 import prometheus_client
 from py_grpc_prometheus import prometheus_server_interceptor
@@ -56,7 +58,8 @@ def initialize_logger(debug_mode=False):
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
 
-    formatter = logging.Formatter('[%(levelname)s]:[%(name)s]: %(message)s')
+    formatter = logging.Formatter(
+        '[%(asctime)s]:[%(levelname)s]:[%(name)s]: %(message)s')
     console = logging.StreamHandler(stream=sys.stdout)
     console.setFormatter(formatter)
 
@@ -154,11 +157,10 @@ class ProcessingServicer(processing_service_pb2_grpc.ProcessingServiceServicer):
 if __name__ == '__main__':
     initialize_logger()
     LOGGER = logging.getLogger(__name__)
-    LISTEN_PORT = os.getenv('LISTEN_PORT', '8080')
-    WORKERS = int(os.getenv('WORKERS', '10'))
-    PROMETHEUS_PORT = int(os.getenv('PROMETHEUS_PORT', '8000'))
-    PROMETHEUS_ENABLED = os.getenv('PROMETHEUS_ENABLED', 'true')
-    PROMETHEUS_ENABLED = PROMETHEUS_ENABLED.lower() == 'true'
+    WORKERS = int(multiprocessing.cpu_count())
+    LISTEN_PORT = config('LISTEN_PORT', default=8080, cast=int)
+    PROMETHEUS_PORT = config('PROMETHEUS_PORT', default=8000, cast=int)
+    PROMETHEUS_ENABLED = config('PROMETHEUS_ENABLED', default=True, cast=bool)
 
     # Add the required interceptor(s) where you create your grpc server, e.g.
     PSI = prometheus_server_interceptor.PromServerInterceptor()
