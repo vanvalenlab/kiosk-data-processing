@@ -34,6 +34,7 @@ from data_processing.processing import noramlize
 from data_processing.processing import deepcell
 from data_processing.processing import mibi
 from data_processing.processing import watershed
+from data_processing.processing import retinanet_to_label_image
 
 del absolute_import
 del division

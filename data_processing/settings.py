@@ -38,6 +38,7 @@ PROCESSING_FUNCTIONS = {
     'post': {
         'deepcell': processing.deepcell,
         'mibi': processing.mibi,
-        'watershed': processing.watershed
+        'watershed': processing.watershed,
+        'retinanet': processing.retinanet_to_label_image
     },
 }
