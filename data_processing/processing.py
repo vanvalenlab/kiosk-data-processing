@@ -37,6 +37,8 @@ from skimage.measure import label
 from skimage.transform import resize
 from skimage.segmentation import random_walker, relabel_sequential
 
+from tensorflow.python.keras import backend as K
+
 
 def noramlize(image):
     """Normalize image data by dividing by the maximum pixel value

@@ -83,7 +83,7 @@ def _retinanet_data(im):
     # semantic
     semantic = np.zeros((n_batch, im.shape[0], im.shape[1], 4))
     semantic[:, :, :] = _transform_masks(np.reshape(
-        im, (1, 1, im.shape[0], im.shape[1], 1)), 'watershed')
+        im, (1, im.shape[0], im.shape[1], 1)), 'watershed')
 
     return [boxes, scores, labels, masks, semantic]
 
