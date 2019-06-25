@@ -37,8 +37,6 @@ from skimage.measure import label
 from skimage.transform import resize
 from skimage.segmentation import random_walker, relabel_sequential
 
-from tensorflow.python.keras import backend as K
-
 
 def noramlize(image):
     """Normalize image data by dividing by the maximum pixel value
@@ -232,13 +230,13 @@ def retinanet_to_label_image(retinanet_outputs,
 
         # Compute overlap of masks with each other
         mask_image = np.zeros((masks.shape[0], semantic.shape[0],
-                               semantic.shape[1]), dtype=K.floatx())
+                               semantic.shape[1]), dtype='float32')
 
         for j in range(masks.shape[0]):
             mask = masks[j]
             box = boxes[j].astype(int)
             mask = resize(mask, (box[3]-box[1], box[2]-box[0]))
-            mask = (mask > binarize_threshold).astype(K.floatx())
+            mask = (mask > binarize_threshold).astype('float32')
             mask_image[j, box[1]:box[3], box[0]:box[2]] = mask
 
         ious = compute_iou(mask_image, mask_image)
