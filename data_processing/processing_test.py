@@ -31,8 +31,6 @@ from __future__ import print_function
 import numpy as np
 from skimage.measure import regionprops
 
-from deepcell.image_generators import _transform_masks
-
 from data_processing import processing
 
 
@@ -82,8 +80,8 @@ def _retinanet_data(im):
 
     # semantic
     semantic = np.zeros((n_batch, im.shape[0], im.shape[1], 4))
-    semantic[:, :, :] = _transform_masks(np.reshape(
-        im, (1, im.shape[0], im.shape[1], 1)), 'watershed')
+    semantic[:, :, :] = processing.watershed(np.reshape(
+        im, (1, im.shape[0], im.shape[1], 1)))
 
     return [boxes, scores, labels, masks, semantic]
 
