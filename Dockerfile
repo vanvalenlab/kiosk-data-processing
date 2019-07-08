@@ -36,6 +36,6 @@ ENV LISTEN_PORT=8080 \
     PROMETHEUS_ENABLED=true \
     PROMETHEUS_PORT=8000
 
-COPY data_processing/ server.py ./
+COPY . .
 
 ENTRYPOINT [ "python", "server.py" ]
