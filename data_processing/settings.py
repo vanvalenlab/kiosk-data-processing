@@ -36,7 +36,7 @@ PROCESSING_FUNCTIONS = {
         'normalize': processing.noramlize,
     },
     'post': {
-        'deepcell': processing.deepcell,
+        'pixelwise': processing.pixelwise,
         'mibi': processing.mibi,
         'watershed': processing.watershed
     },
