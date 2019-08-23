@@ -155,12 +155,12 @@ def watershed(image, min_distance=10, threshold_abs=0.05):
     return results
 
 
-def deepcell(prediction, threshold=.8):
-    """Post-processing for deepcell transform predictions.
+def pixelwise(prediction, threshold=.8):
+    """Post-processing for pixelwise transform predictions.
     Uses the interior predictions to uniquely label every instance.
 
     Args:
-        prediction: deepcell transform prediction
+        prediction: pixelwise transform prediction
         threshold: confidence threshold for interior predictions
 
     Returns:

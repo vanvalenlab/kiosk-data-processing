@@ -36,7 +36,8 @@ PROCESSING_FUNCTIONS = {
         'normalize': processing.noramlize,
     },
     'post': {
-        'deepcell': processing.deepcell,
+        'pixelwise': processing.pixelwise,
+        'deepcell': processing.pixelwise,  # TODO: this is deprecated.
         'mibi': processing.mibi,
         'watershed': processing.watershed
     },

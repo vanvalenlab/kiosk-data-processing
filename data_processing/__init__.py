@@ -31,7 +31,7 @@ from __future__ import print_function
 from data_processing import processing
 
 from data_processing.processing import noramlize
-from data_processing.processing import deepcell
+from data_processing.processing import pixelwise
 from data_processing.processing import mibi
 from data_processing.processing import watershed
 
